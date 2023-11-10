@@ -1,6 +1,6 @@
 #!/usr/bin/make -sf
 # requires bash, 'dnf install dialog curl' and 'gem install nokogiri'
-# to debug: make -f windows-download v=1
+# to debug: make -f windows-iso-url v=1
 
 user_agent := Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
 SHELL := bash -o pipefail

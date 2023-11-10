@@ -14,7 +14,7 @@ It's actually a GNU Make's makefile:
 $ head -3 windows-iso-url
 #!/usr/bin/make -sf
 # requires bash, 'dnf install dialog curl' and 'gem install nokogiri'
-# to debug: make -f windows-download v=1
+# to debug: make -f windows-iso-url v=1
 ~~~
 
 ## Usage
