@@ -1,7 +1,7 @@
 https://www.youtube.com/watch?v=5jnmDNxSiAo
 
-There are some scripts on Github that supposedly do the similar job,
-but I believe this one is the smallest:
+There are some scripts on GitHub that supposedly perform a similar
+job, but I believe this one is the smallest:
 
 ~~~
 $ grep -Ev '^#|^$' windows-iso-url | wc -l
@@ -24,8 +24,8 @@ This should print a list of URLs:
     $ mkdir tmp && cd tmp
     $ windows-iso-url
 
-You only need to run in a tmp dir, because it saves its state in a
-bunch of `step*` text files.
+You only need to run it in a temporary directory because it saves its
+state in a bunch of `step*` text files.
 
 ## Loicense
 
