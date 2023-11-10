@@ -21,11 +21,10 @@ $ head -3 windows-iso-url
 
 This should print a list of URLs:
 
-    $ mkdir tmp && cd tmp
-    $ windows-iso-url
+    $ ./windows-iso-url
 
-You only need to run it in a temporary directory because it saves its
-state in a bunch of `step*` text files.
+You may need to run it in a temporary directory because it saves its
+state in a bunch of `step*` text files (which it autoremoves).
 
 ## Loicense
 
