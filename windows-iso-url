@@ -1,0 +1,69 @@
+#!/usr/bin/make -sf
+# requires bash, 'dnf install dialog curl' and 'gem install nokogiri'
+# to debug: make -f windows-download v=1
+
+user_agent := Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+SHELL := bash -o pipefail
+session_id := $(shell uuidgen)
+
+all: step6
+
+step0-windows.txt:
+	dialog --keep-tite --no-tags --menu "Select Windows" 0 0 0 \
+	 "https://www.microsoft.com/en-us/software-download/windows11" 11 \
+	 "https://www.microsoft.com/en-us/software-download/windows10ISO" 10 \
+	 "https://www.microsoft.com/en-us/software-download/windows8ISO" 8.1 \
+	 2>$@
+
+step1-editions.html: step0-windows.txt; cat $< | xargs $(curl) > $@
+
+# extract the list of editions, then a user selects 1 edition
+step2-edition.txt: step1-editions.html
+	ruby <(echo "$$parse_products") product-edition < $< | $(call dialog,Select edition) 2>$@
+
+# fetch product languages
+step3-lang.html: step2-edition.txt
+	ruby <(echo "$$build_request_url") SoftwareDownload_LanguageSelectionByProductEdition getskuinformationbyproductedition $(session_id) productEditionId="`cat $<`" < step1-editions.html | xargs $(curl) -X POST --data "" > $@
+
+# extract the list of languages, then the user selects 1 language
+step4-lang.txt: step3-lang.html
+	ruby <(echo "$$parse_products") product-languages < $< | $(call dialog,Select languages) 2>$@
+
+# fetch iso urls
+step5-urls.html: step4-lang.txt
+# fetch some junk providing our session_id to the endpoint;
+# w/o this we get an invalid responce in the final curl request
+	$(curl) 'https://vlscppe.microsoft.com/fp/tags.js?org_id=y6jn8c31&session_id=$(session_id)' > /dev/null
+	ruby <(echo "$$build_request_url") SoftwareDownload_DownloadLinks GetProductDownloadLinksBySku $(session_id) skuId="`cat $<`" < step1-editions.html | xargs $(curl) -X POST --data "" > $@
+
+# extract iso urls
+step6: step5-urls.html
+	[ `nokogiri --type html -e 'p $$_.css("a.button").length' $<` != 0 ] || (echo Invalid responce from the endpoint. Maybe your IP is banned.; exit 1)
+	nokogiri --type html -e 'puts $$_.css("a.button").map {|n| n["href"]}.join "\n"' $<
+
+.DELETE_ON_ERROR:
+
+export define parse_products :=
+require "nokogiri"; require "json"
+puts Nokogiri::HTML(STDIN.read).css("select#"+ARGV[0]).children
+ .select {|o| o.name == "option" && o["value"] != "" }
+ .map {|o| j=JSON.parse(o["value"]); [j.kind_of?(Integer)?j:j["id"], Shellwords.escape(o.text.strip)] }
+ .flatten.join " "
+endef
+
+export define build_request_url := # css_selector action session_id key=val
+require "nokogiri"
+n = Nokogiri::HTML(STDIN.read).at_css("#"+ARGV[0])
+endpoint = "https://www.microsoft.com/en-us/api/controls/contentinclude/html"
+puts [endpoint+"?pageId="+n["data-defaultpageid"],
+ "host="+n["data-host"], "segments="+n["data-host-segments"], "sdVersion=2",
+ "action="+ARGV[1], "sessionId="+ARGV[2], ARGV[3]
+].join "&"
+endef
+
+dialog = xargs dialog --keep-tite --menu "$1" 0 0 0
+curl = curl -sf --referer "`cat step0-windows.txt`" -A '$(user_agent)'
+
+ifndef v
+.INTERMEDIATE: step0-windows.txt step1-editions.html step2-edition.txt step3-lang.html step4-lang.txt step5-urls.html
+endif
