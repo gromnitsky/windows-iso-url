@@ -38,7 +38,7 @@ step5-urls.json: step4-lang.txt
 
 # extract iso urls
 step6: step5-urls.json
-	ruby -rjson -e 'j=JSON.parse(STDIN.read); url=j.dig("ProductDownloadOptions", 0, "Uri"); if url then puts url else abort j.dig("Errors", 0, "Value") end' < $<
+	ruby -rjson -e 'j=JSON.parse(STDIN.read); e=j.dig("Errors", 0, "Value"); abort e.to_s if e; j.dig("ProductDownloadOptions").each {|v| puts v["Uri"]}' < $<
 
 .DELETE_ON_ERROR:
 
