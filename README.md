@@ -1,4 +1,4 @@
-https://www.youtube.com/watch?v=5jnmDNxSiAo
+https://www.youtube.com/watch?v=P6p5nzKptXk
 
 There are some scripts on GitHub that supposedly perform a similar
 job, but I believe this one is the smallest:
@@ -8,7 +8,7 @@ $ grep -Ev '^#|^$' windows-iso-url | wc -l
 29
 ~~~
 
-It's actually a GNU Make's makefile.
+It's actually a makefile.
 
 ## Usage
 
