@@ -5,17 +5,10 @@ job, but I believe this one is the smallest:
 
 ~~~
 $ grep -Ev '^#|^$' windows-iso-url | wc -l
-46
+29
 ~~~
 
-It's actually a GNU Make's makefile:
-
-~~~
-$ sed -n '1,2p;/check:/p' windows-iso-url
-#!/usr/bin/make -sf
-# to debug: make -f windows-iso-url v=1
-check:; type uuidgen dialog curl nokogiri ruby > /dev/null
-~~~
+It's actually a GNU Make's makefile.
 
 ## Usage
 
