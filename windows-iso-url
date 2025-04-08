@@ -10,10 +10,9 @@ all: step6
 check:; type uuidgen dialog curl nokogiri ruby > /dev/null
 
 step0-windows.txt: check
-	dialog --keep-tite --no-tags --menu "Select Windows" 0 0 0 \
-	 "https://www.microsoft.com/en-us/software-download/windows11" 11 \
-	 "https://www.microsoft.com/en-us/software-download/windows10ISO" 10 \
-	 2>$@
+	echo "https://www.microsoft.com/en-us/software-download/windows11" 11 \
+	 "https://www.microsoft.com/en-us/software-download/windows10ISO" 10 | \
+	$(call dialog,Select Windows version) 2>$@
 
 step1-editions.html: step0-windows.txt; cat $< | xargs $(curl) > $@
 
@@ -42,7 +41,7 @@ step6: step5-urls.json
 
 .DELETE_ON_ERROR:
 
-dialog = xargs dialog --keep-tite --menu "$1" 0 0 0
+dialog = xargs dialog --keep-tite --no-tags --menu "$1" 0 0 0
 curl = curl -sf --referer "`cat step0-windows.txt`" -A '$(user_agent)'
 
 ifndef v
